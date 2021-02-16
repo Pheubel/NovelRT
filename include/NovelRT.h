@@ -52,10 +52,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-//GLM
-#include <glm/glm.hpp>
-#include <glm/gtx/rotate_vector.hpp>
-
 //OpenAL
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -178,18 +174,14 @@ namespace NovelRT::Windowing {
 
 #include "NovelRT/Animation/AnimatorPlayState.h"
 #include "NovelRT/Animation/SpriteAnimatorFrame.h"
-#include "NovelRT/Maths/GeoVector2F.h"
-#include "NovelRT/Maths/GeoVector3F.h"
-#include "NovelRT/Maths/GeoVector4F.h"
-#include "NovelRT/Maths/GeoMatrix4x4F.h"
-#include "NovelRT/Maths/GeoBounds.h"
-#include "NovelRT/Maths/QuadTreePoint.h"
-#include "NovelRT/Maths/QuadTree.h"
 #include "NovelRT/Transform.h"
 #include "NovelRT/Graphics/GraphicsCharacterRenderData.h"
 #include "NovelRT/Graphics/ImageData.h"
 #include "NovelRT/Graphics/ShaderProgram.h"
 #include "NovelRT/Graphics/RGBAConfig.h"
+
+//Maths types
+#include "NovelRT/Maths/Maths.h"
 
 //base types
 #include "NovelRT/LoggingService.h" //this isn't in the services section due to include order/dependencies.

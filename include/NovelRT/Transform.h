@@ -4,9 +4,8 @@
 #ifndef NOVELRT_NOVELWORLDOBJECT_H
 #define NOVELRT_NOVELWORLDOBJECT_H
 
-#ifndef NOVELRT_H
-#error Please do not include this directly. Use the centralised header (NovelRT.h) instead!
-#endif
+#include "Maths/GeoVector2F.h"
+#include "Maths/GeoBounds.h"
 
 namespace NovelRT
 {
@@ -21,16 +20,9 @@ namespace NovelRT
         float rotation;
 
         /**
-    <<<<<<< HEAD
-         * Creates a new Transform with the specified position, rotation and scale.
-         * @param position The position which represents the position of the transform in a given space such as screen
-    or
-         * world space.
-    =======
          * @brief Creates a new Transform with the specified position, rotation and scale.
          * @param position The position which represents the position of the transform in a given space such as screen
-    or world space.
-    >>>>>>> master
+         * or world space.
          * @param rotation The rotation, in degrees, which represents the rotation of the transform.
          * @param scale The scale which represents the size of the transform.
          */
