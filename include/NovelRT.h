@@ -6,11 +6,6 @@
 
 // clang-format off
 
-#if defined(NDEBUG)
-#define unused(x)  (void)(x)
-#else
-#define unused(x)  (void)(0)
-#endif
 
 //stdlib
 #define __STDC_WANT_LIB_EXT1__ 1
