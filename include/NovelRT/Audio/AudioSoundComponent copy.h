@@ -2,18 +2,16 @@
 // for more information.
 #include <stdint.h>
 
-#ifndef NOVELRT_AUDIO_AUDIOSOUNDCOMPONENT_H
-#define NOVELRT_AUDIO_AUDIOSOUNDCOMPONENT_H
+#ifndef NOVELRT_AUDIO_AUDIOLISTENERCOMPONENT_H
+#define NOVELRT_AUDIO_AUDIOLISTENERCOMPONENT_H
 
 namespace NovelRT::Audio
 {
-  struct AudioSoundComponent
+  struct AudioListenerComponent
   {
     public:
       uintptr_t id;
-      float volume;
-      float pitch;
   };
 }
 
-#endif //NOVELRT_AUDIO_AUDIOCOMPONENT_H
+#endif //NOVELRT_AUDIO_AUDIOLISTENERCOMPONENT_H
