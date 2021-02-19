@@ -7,7 +7,6 @@
 #include <list>
 #include <stdint.h>
 
-std::list<std::shared_ptr<NovelRT::Audio::AudioService>> _audioCollection;
 std::list<std::shared_ptr<NovelRT::Input::InteractionService>> _interactionCollection;
 std::list<std::shared_ptr<NovelRT::Windowing::WindowingService>> _windowingCollection;
 std::list<std::shared_ptr<NovelRT::DotNet::RuntimeService>> _runtimeCollection;
@@ -57,28 +56,6 @@ extern "C"
         NovelRT::NovelRunner* cRunner = reinterpret_cast<NovelRT::NovelRunner*>(runner);
 
         cRunner->~NovelRunner();
-        return NRT_SUCCESS;
-    }
-
-    NrtResult Nrt_NovelRunner_getAudioService(NrtNovelRunner runner, NrtAudioService* outputService)
-    {
-        if (runner == nullptr || outputService == nullptr)
-        {
-            Nrt_setErrMsgIsNullptrInternal();
-            return NRT_FAILURE_NULLPTR_PROVIDED;
-        }
-
-        NovelRT::NovelRunner* cRunner = reinterpret_cast<NovelRT::NovelRunner*>(runner);
-        _audioCollection.push_back(cRunner->getAudioService());
-
-        auto ptr = _audioCollection.back().get();
-        if (ptr == nullptr)
-        {
-            return NRT_FAILURE_NULLPTR_PROVIDED;
-        }
-
-        *outputService = reinterpret_cast<NrtAudioService>(ptr);
-
         return NRT_SUCCESS;
     }
 

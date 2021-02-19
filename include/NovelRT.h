@@ -56,13 +56,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 
-//OpenAL
-#include <AL/al.h>
-#include <AL/alc.h>
-
-//LibSndfile
-#include <sndfile.h>
-
 //nethost
 #include "NovelRT/DotNet/coreclr_delegates.h"
 #include "NovelRT/DotNet/hostfxr.h"
@@ -100,14 +93,14 @@ namespace NovelRT {
 namespace NovelRT::Animation {
   typedef class SpriteAnimator SpriteAnimator;
 }
-/***
- * @brief Contains audio features, such as playing audio, and managing audio resources.
- */
-namespace NovelRT::Audio {
-  typedef std::vector<ALuint> SoundBank;
-  typedef std::vector<ALuint> MusicBank;
-  typedef class AudioService AudioService;
-}
+// /***
+//  * @brief Contains audio features, such as playing audio, and managing audio resources.
+//  */
+// namespace NovelRT::Audio {
+//   typedef std::vector<ALuint> SoundBank;
+//   typedef std::vector<ALuint> MusicBank;
+//   typedef class AudioService AudioService;
+// }
 /**
  * @brief Contains features to interop with the .NET Core runtime.
  */
@@ -227,7 +220,6 @@ namespace NovelRT::Windowing {
 #include "NovelRT/Input/KeyStateFrameChangeLog.h"
 
 //Engine service types
-#include "NovelRT/Audio/AudioService.h"
 #include "NovelRT/DebugService.h"
 #include "NovelRT/DotNet/RuntimeService.h"
 #include "NovelRT/Input/InteractionService.h"

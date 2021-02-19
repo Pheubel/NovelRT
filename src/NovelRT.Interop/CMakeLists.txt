@@ -10,8 +10,6 @@ set(INTEROP_SOURCES
   Animation/NrtSpriteAnimatorState.cpp
   Animation/NrtSpriteAnimator.cpp
 
-  Audio/NrtAudioService.cpp
-
   DotNet/NrtRuntimeService.cpp
 
   Ecs/NrtCatalogue.cpp

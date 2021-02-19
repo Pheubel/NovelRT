@@ -1,6 +1,5 @@
 // Copyright © Matt Jones and Contributors. Licensed under the MIT Licence (MIT). See LICENCE.md in the repository root
 // for more information.
-#include "Audio/NrtAudioService.h"
 #include "DotNet/NrtRuntimeService.h"
 #include "Graphics/NrtRenderingService.h"
 #include "Input/NrtInteractionService.h"
@@ -28,7 +27,6 @@ extern "C"
     NrtResult Nrt_NovelRunner_runNovel(NrtNovelRunner runner);
     NrtResult Nrt_NovelRunner_destroy(NrtNovelRunner runner);
 
-    NrtResult Nrt_NovelRunner_getAudioService(NrtNovelRunner runner, NrtAudioService* outputService);
     NrtResult Nrt_NovelRunner_getInteractionService(NrtNovelRunner runner, NrtInteractionService* outputService);
     NrtResult Nrt_NovelRunner_getWindowingService(NrtNovelRunner runner, NrtWindowingService* outputService);
     NrtResult Nrt_NovelRunner_getRuntimeService(NrtNovelRunner runner, NrtRuntimeService* outputService);

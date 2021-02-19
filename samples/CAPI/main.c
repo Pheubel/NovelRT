@@ -25,7 +25,6 @@ int32_t hMove = 1; // 1 == move right, 0 == move left
 int32_t vMove = 1; // 1 == move up, 0 == move down
 
 // Services
-NrtAudioService audio = NULL;
 NrtInteractionService input = NULL;
 NrtLoggingService console = NULL;
 NrtRuntimeService dotnet = NULL;
@@ -161,25 +160,6 @@ int main()
         return -1;
     }
     const char* path = Nrt_appendFilePath(2, execPath, "Resources");
-
-    // Getting & Initialising AudioService
-    res = Nrt_NovelRunner_getAudioService(runner, &audio);
-    if (res != NRT_SUCCESS)
-    {
-        const char* errMsg = Nrt_appendText(2, "Error getting AudioService: ", Nrt_getLastError());
-        Nrt_LoggingService_logErrorLine(console, errMsg);
-        return -1;
-    }
-    else
-    {
-        booleanResult = Nrt_AudioService_initialiseAudio(audio);
-        if (booleanResult != NRT_TRUE)
-        {
-            const char* errMsg = Nrt_appendText(2, "Error initialising AudioService: ", Nrt_getLastError());
-            Nrt_LoggingService_logErrorLine(console, errMsg);
-            return -1;
-        }
-    }
 
     // Getting InteractionService
     res = Nrt_NovelRunner_getInteractionService(runner, &input);
