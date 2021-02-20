@@ -13,8 +13,7 @@ namespace NovelRT::Audio
   {
     public:
       NullAudioSystem();
-      void Update(NovelRT::Timing::Timestamp stamp,
-        NovelRT::Ecs::Catalogue catalogue);
+      void Update(NovelRT::Ecs::Catalogue catalogue);
 
     private:
       bool Initialize();

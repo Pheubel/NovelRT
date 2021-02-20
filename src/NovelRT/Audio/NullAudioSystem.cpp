@@ -2,6 +2,7 @@
 // for more information.
 #include <NovelRT/Audio/NullAudioSystem.h>
 #include <iostream>
+#include <NovelRT/Audio/AudioSoundComponent.h>
 
 namespace NovelRT::Audio
 {
@@ -17,9 +18,14 @@ namespace NovelRT::Audio
     return true;
   }
 
-  void NullAudioSystem::Update(NovelRT::Timing::Timestamp stamp, NovelRT::Ecs::Catalogue catalogue)
+  void NullAudioSystem::Update(NovelRT::Ecs::Catalogue catalogue)
   {
+    auto[audioComponents] = catalogue.GetComponentViews<AudioSoundComponent>();
 
+    for(auto[entity, component] : audioComponents)
+    {
+      std::cout << "Entity " << entity << "owns AudioSoundComponent " << component.id << std::endl;
+    }
   }
 
 

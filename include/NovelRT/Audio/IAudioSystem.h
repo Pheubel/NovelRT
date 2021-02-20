@@ -14,8 +14,7 @@ namespace NovelRT::Audio
     public:
       bool isInitialised = false;
 
-      virtual void Update(NovelRT::Timing::Timestamp stamp,
-        NovelRT::Ecs::Catalogue catalogue) = 0;
+      virtual void Update(NovelRT::Ecs::Catalogue catalogue) = 0;
 
   };
 }
