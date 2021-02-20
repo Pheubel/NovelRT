@@ -1,23 +1,23 @@
 // Copyright © Matt Jones and Contributors. Licensed under the MIT Licence (MIT). See LICENCE.md in the repository root
 // for more information.
+#include "IAudioSystem.h"
 #include "../Timing/Timestamp.h"
 #include "../Ecs/Catalogue.h"
 
-
-#ifndef NOVELRT_AUDIO_IAUDIOSYSTEM_H
-#define NOVELRT_AUDIO_IAUDIOSYSTEM_H
+#ifndef NOVELRT_AUDIO_OPENALAUDIOSYSTEM_H
+#define NOVELRT_AUDIO_OPENALAUDIOSYSTEM_H
 
 namespace NovelRT::Audio
 {
-  class IAudioSystem
+  class OpenALAudioSystem : public IAudioSystem
   {
     public:
       bool isInitialised = false;
 
-      virtual void Update(NovelRT::Timing::Timestamp stamp,
-        NovelRT::Ecs::Catalogue catalogue) = 0;
+      void Update(NovelRT::Timing::Timestamp stamp,
+        NovelRT::Ecs::Catalogue catalogue);
 
   };
 }
 
-#endif //NOVELRT_AUDIO_IAUDIOSYSTEM_H
+#endif //NOVELRT_AUDIO_OPENALAUDIOSYSTEM_H
