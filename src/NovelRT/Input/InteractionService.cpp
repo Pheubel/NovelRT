@@ -1,111 +1,174 @@
-// Copyright © Matt Jones and Contributors. Licensed under the MIT Licence (MIT). See LICENCE.md in the repository root for more information.
+// Copyright © Matt Jones and Contributors. Licensed under the MIT Licence (MIT). See LICENCE.md in the repository root
+// for more information.
 
 #include <NovelRT.h>
 
-namespace NovelRT::Input {
-  InteractionService::InteractionService(NovelRunner* const runner) noexcept :
-    _runner(runner),
-    _clickTarget(nullptr),
-    _logger(LoggingService(Utilities::Misc::CONSOLE_LOG_INPUT)) {
-    auto ptr = _runner->getWindowingService();
-    if(!ptr.expired()) ptr.lock()->WindowResized += [this](auto value) {
-      setScreenSize(value);
-    };
-  }
-
-  void InteractionService::validateIfKeyCached(KeyCode code) {
-    auto result = _keyStates.find(code);
-
-    if (result == _keyStates.end()) {
-      _keyStates.insert({ code, KeyState::Idle });
-    }
-  }
-  void InteractionService::processKeyState(KeyCode code, KeyState state) {
-    validateIfKeyCached(code);
-
-    auto result = _keyStates.find(code);
-
-    switch (state) {
-    case KeyState::KeyDown:
-      if (result->second == KeyState::KeyDown) {
-        result->second = KeyState::KeyDownHeld;
-      }
-      else if (result->second != KeyState::KeyDownHeld) {
-        result->second = KeyState::KeyDown;
-      }
-      break;
-    case KeyState::KeyDownHeld:
-    case KeyState::KeyUp:
-      result->second = (result->second == KeyState::KeyUp) ? KeyState::Idle : state; //lmao
-      break;
-    }
-  }
-
-  void InteractionService::processMouseStates() {
-    for (int32_t i = static_cast<int32_t>(KeyCode::FirstMouseButton); i < static_cast<int32_t>(KeyCode::LastMouseButton); i++) {
-      auto keyCode = static_cast<KeyCode>(i);
-      auto result = _keyStates.find(keyCode);
-
-      if (result == _keyStates.end()) continue;
-      processKeyState(result->first, result->second);
-    }
-  }
-
-  void InteractionService::acceptKeyboardInputBindingPush(int key, int action) {
-
-    auto keyState = static_cast<KeyState>(action);
-    auto keyCode = static_cast<KeyCode>(key);
-
-    auto result = _keyStates.find(keyCode);
-
-    if (result == _keyStates.end()) {
-      _keyStates.insert({ keyCode, keyState });
-      return;
+namespace NovelRT::Input
+{
+    InteractionService::InteractionService(std::shared_ptr<Windowing::WindowingService> windowingService) noexcept
+        : _previousBufferIndex(0),
+          _currentBufferIndex(1),
+          _clickTarget(nullptr),
+          _logger(LoggingService(Utilities::Misc::CONSOLE_LOG_INPUT))
+    {
+        windowingService->WindowResized += [this](auto value) { setScreenSize(value); };
+        windowingService->MouseButtonClicked += [this](auto eventArgs) {
+            acceptMouseButtonClickPush(eventArgs.button, eventArgs.action, eventArgs.mousePosition);
+        };
+        windowingService->KeyboardButtonChanged +=
+            [this](auto eventArgs) { acceptKeyboardInputBindingPush(eventArgs.key, eventArgs.action); };
     }
 
-    validateIfKeyCached(keyCode);
-    processKeyState(keyCode, keyState);
-  }
+    void InteractionService::processKeyState(KeyCode code, KeyState state)
+    {
+        auto& previousBuffer = _keyStates.at(_previousBufferIndex);
+        auto& currentBuffer = _keyStates.at(_currentBufferIndex);
 
-  void InteractionService::acceptMouseButtonClickPush(int button, int action, const Maths::GeoVector2<float>& mousePosition) {
-    auto keyState = static_cast<KeyState>(action);
-    auto keyCode = static_cast<KeyCode>(button);
-    auto value = Maths::GeoVector4<float>(mousePosition).vec4Value() * glm::scale(glm::vec3(1920.0f / _screenSize.getX(), 1080.0f / _screenSize.getY(), 0.0f));
+        auto previousBufferResult = previousBuffer.find(code);
+        KeyState previousStateResult;
 
-    auto result = _mousePositionsOnScreenPerButton.find(keyCode);
+        if (previousBufferResult == previousBuffer.end())
+        {
+            previousStateResult = KeyState::Idle;
+        }
+        else
+        {
+            previousStateResult = previousBufferResult->second.getCurrentState();
+        }
 
-    if (result == _mousePositionsOnScreenPerButton.end()) {
-      _mousePositionsOnScreenPerButton.insert({ keyCode, Maths::GeoVector2<float>(value.x, value.y) });
+        auto currentBufferResult = currentBuffer.find(code);
+        KeyStateFrameChangeLog changeLogObject{};
+
+        if (currentBufferResult == currentBuffer.end())
+        {
+            changeLogObject = KeyStateFrameChangeLog();
+        }
+        else
+        {
+            changeLogObject = currentBufferResult->second;
+        }
+
+        switch (state)
+        {
+            case KeyState::KeyDown:
+                if (previousStateResult == KeyState::KeyDown)
+                {
+                    changeLogObject.pushNewState(KeyState::KeyDownHeld);
+                }
+                else if (previousStateResult != KeyState::KeyDownHeld)
+                {
+                    changeLogObject.pushNewState(KeyState::KeyDown); // TODO: Is this actually gonna work lol
+                }
+                break;
+            case KeyState::KeyDownHeld:
+            case KeyState::KeyUp:
+                changeLogObject.pushNewState((previousStateResult == KeyState::KeyUp) ? KeyState::Idle : state);
+                break;
+            case KeyState::Idle:
+            default:
+                // do nothing. Seriously. These cases are only here because the Ubuntu build cried at me in CI for not
+                // having them suddenly.
+                break;
+        }
+
+        currentBuffer.insert_or_assign(code, changeLogObject);
     }
-    else {
-      result->second = Maths::GeoVector2<float>(value.x, value.y);
+
+    void InteractionService::processKeyStates()
+    {
+        auto& currentBuffer = _keyStates.at(_currentBufferIndex);
+
+        for (const auto& pair : _keyStates.at(_previousBufferIndex))
+        {
+            auto findResultForCurrent = currentBuffer.find(pair.first);
+            if (findResultForCurrent != currentBuffer.end())
+            {
+                processKeyState(findResultForCurrent->first, findResultForCurrent->second.getCurrentState());
+            }
+            else
+            {
+                processKeyState(pair.first, pair.second.getCurrentState());
+            }
+        }
     }
 
-    validateIfKeyCached(keyCode);
-    processKeyState(keyCode, keyState);
-  }
+    void InteractionService::acceptKeyboardInputBindingPush(int32_t key, int32_t action)
+    {
+        auto keyState = static_cast<KeyState>(action);
+        auto keyCode = static_cast<KeyCode>(key);
+        KeyStateFrameChangeLog log{};
 
-  void InteractionService::HandleInteractionDraw(InteractionObject* target) {
-    if (_keyStates[target->subscribedKey()] == KeyState::KeyDown
-      && target->validateInteractionPerimeter(_mousePositionsOnScreenPerButton[target->subscribedKey()])
-      && (_clickTarget == nullptr || (_clickTarget->layer() > target->layer()))) {
-      _logger.logDebug("Valid click target detected! Executing...");
-      _clickTarget = target;
+        if (_keyStates.at(_currentBufferIndex).find(keyCode) != _keyStates.at(_currentBufferIndex).end())
+        {
+            log = _keyStates.at(_currentBufferIndex).at(keyCode);
+        }
+
+        log.pushNewState(keyState);
+        _keyStates.at(_currentBufferIndex).insert_or_assign(keyCode, log);
     }
-  }
 
-void InteractionService::consumePlayerInput() {
-  processMouseStates();
-  glfwPollEvents();
-}
+    void InteractionService::acceptMouseButtonClickPush(int32_t button,
+                                                        int32_t action,
+                                                        Maths::GeoVector2F mousePosition)
+    {
+        auto keyState = static_cast<KeyState>(action);
+        auto keyCode = static_cast<KeyCode>(button);
+        auto value = Maths::GeoVector4F(mousePosition).vec4Value() *
+                     glm::scale(glm::vec3(1920.0f / _screenSize.x, 1080.0f / _screenSize.y, 0.0f));
 
-  std::unique_ptr<BasicInteractionRect> InteractionService::createBasicInteractionRect(const Transform& transform, int layer) {
-    return std::make_unique<BasicInteractionRect>(transform, layer, [this](InteractionObject* x) { HandleInteractionDraw(x); });
-  }
-  void InteractionService::executeClickedInteractable() {
-    if (_clickTarget == nullptr) return;
+        _cursorPosition = Maths::GeoVector2F(value.x, value.y);
+        KeyStateFrameChangeLog log{};
 
-    _clickTarget->Interacted();
-    _clickTarget = nullptr;
-  }
-}
+        if (_keyStates.at(_currentBufferIndex).find(keyCode) != _keyStates.at(_currentBufferIndex).end())
+        {
+            log = _keyStates.at(_currentBufferIndex).at(keyCode);
+        }
+
+        log.pushNewState(keyState);
+        _keyStates.at(_currentBufferIndex).insert_or_assign(keyCode, log);
+    }
+
+    void InteractionService::HandleInteractionDraw(InteractionObject* target)
+    {
+
+        auto& currentBuffer = _keyStates.at(_currentBufferIndex);
+        auto subscribedKeyIterator = currentBuffer.find(target->subscribedKey());
+
+        if (subscribedKeyIterator == currentBuffer.end())
+        {
+            return;
+        }
+
+        if (subscribedKeyIterator->second == KeyState::KeyDown &&
+            target->validateInteractionPerimeter(_cursorPosition) &&
+            (_clickTarget == nullptr || (_clickTarget->layer() > target->layer())))
+        {
+            _logger.logDebug("Valid click target detected! Executing...");
+            _clickTarget = target;
+        }
+    }
+
+    void InteractionService::consumePlayerInput()
+    {
+        _currentBufferIndex = (_currentBufferIndex + 1) % INPUT_BUFFER_COUNT;
+        _keyStates.at(_currentBufferIndex).clear();
+        glfwPollEvents();
+        processKeyStates();
+        _previousBufferIndex = _currentBufferIndex;
+    }
+
+    std::unique_ptr<BasicInteractionRect> InteractionService::createBasicInteractionRect(Transform transform,
+                                                                                         int32_t layer)
+    {
+        return std::make_unique<BasicInteractionRect>(transform, layer,
+                                                      [this](InteractionObject* x) { HandleInteractionDraw(x); });
+    }
+    void InteractionService::executeClickedInteractable()
+    {
+        if (_clickTarget == nullptr)
+            return;
+
+        _clickTarget->Interacted();
+        _clickTarget = nullptr;
+    }
+} // namespace NovelRT::Input

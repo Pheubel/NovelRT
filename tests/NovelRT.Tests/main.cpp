@@ -1,6 +1,7 @@
-// Copyright © Matt Jones and Contributors. Licensed under the MIT License (MIT). See LICENCE.md in the repository root for more information.
+// Copyright © Matt Jones and Contributors. Licensed under the MIT License (MIT). See LICENCE.md in the repository root
+// for more information.
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 int main(int argc, char** argv)
 {

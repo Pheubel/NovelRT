@@ -1,34 +1,65 @@
-find_package(Doxygen QUIET)
+function(append_string_to_first_list_element APPEND_ARGS_INPUT APPEND_ARGS_APPENDATURE APPEND_OUT)
+  string(REPLACE "\n" ";" APPEND_LISTED_STRING ${APPEND_ARGS_INPUT})
+  list(GET APPEND_LISTED_STRING 0 APPEND_LISTED_STRING_FIRST)
+  set(APPEND_LISTED_STRING_FIRST_TAGGED "${APPEND_LISTED_STRING_FIRST} ${APPEND_ARGS_APPENDATURE}")
 
-set(DOCS_IMAGES
-  novel-chan_doxy.png
-)
+  list(REMOVE_AT APPEND_LISTED_STRING 0)
+  list(INSERT APPEND_LISTED_STRING 0 "${APPEND_LISTED_STRING_FIRST_TAGGED}")
 
-set(DOCS_RESOURCES
-  ${DOCS_IMAGES}
-)
+  list(JOIN APPEND_LISTED_STRING "\n" APPEND_FINAL)
+  set(${APPEND_OUT} ${APPEND_FINAL} PARENT_SCOPE)
+endfunction()
 
-if (DOXYGEN_FOUND)
-  set(DOXYGEN_INPUT_DIR ${CMAKE_SOURCE_DIR}/include/)
-  set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs)
-  set(DOXYGEN_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/index.html)
-  set(DOXYGEN_FAKE_INDEX_FILE ${DOXYGEN_OUTPUT_DIR}/html/__index.html)
-  set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
-  set(DOXYFILE_OUT ${DOXYGEN_OUTPUT_DIR}/Doxyfile)
+set(DOXYGEN_OUTPUT_DIR ${CMAKE_BINARY_DIR}/doxygen)
+set(DOCS_MAINPAGE
+        ${CMAKE_SOURCE_DIR}/README.md
+        ${CMAKE_SOURCE_DIR}/LICENCE.md
+        ${CMAKE_SOURCE_DIR}/CODE_OF_CONDUCT.md
+        )
 
-  set(DOXYGEN_PROJECT_LOGO ${DOXYGEN_OUTPUT_DIR}/novel-chan_doxy.png)
+foreach(docFile ${DOCS_MAINPAGE})
+  file(READ ${docFile} TEMP_DOC_FILE_CONTENTS)
+  get_filename_component(TEMP_DOC_FILE_NAME ${docFile} NAME)
+  file(REMOVE ${DOXYGEN_OUTPUT_DIR}/${TEMP_DOC_FILE_NAME})
 
-  #Replace variables inside @@ with the current values
-  configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
-  file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR}) #Doxygen won't create this for us
-  file(COPY ${DOCS_RESOURCES} DESTINATION ${DOXYGEN_OUTPUT_DIR})
+  if(${TEMP_DOC_FILE_NAME} STREQUAL "README.md")
+    append_string_to_first_list_element("${TEMP_DOC_FILE_CONTENTS}" "{#mainpage}" TEMP_DOC_FILE_CONTENTS)
+    string(REPLACE "(CODE_OF_CONDUCT.md)" "(@ref conduct)" TEMP_DOC_FILE_CONTENTS ${TEMP_DOC_FILE_CONTENTS})
+    string(REPLACE "(LICENCE.md)" "(@ref licence)" TEMP_DOC_FILE_CONTENTS ${TEMP_DOC_FILE_CONTENTS})
+  endif()
+  if(${TEMP_DOC_FILE_NAME} STREQUAL "CODE_OF_CONDUCT.md")
+    append_string_to_first_list_element("${TEMP_DOC_FILE_CONTENTS}" "{#conduct}" TEMP_DOC_FILE_CONTENTS)
+  endif()
+  if(${TEMP_DOC_FILE_NAME} STREQUAL "LICENCE.md")
+    append_string_to_first_list_element("${TEMP_DOC_FILE_CONTENTS}" "{#licence}" TEMP_DOC_FILE_CONTENTS)
+  endif()
 
-  add_custom_command(OUTPUT
-                       ${DOXYGEN_INDEX_FILE}
-                       ${DOXYGEN_FAKE_INDEX_FILE}
-                     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
-                     MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
-                     COMMENT "Generating docs")
+  file(WRITE ${DOXYGEN_OUTPUT_DIR}/${TEMP_DOC_FILE_NAME} "${TEMP_DOC_FILE_CONTENTS}")
+endforeach()
 
-  add_custom_target(Doxygen ALL DEPENDS ${DOXYGEN_INDEX_FILE})
-endif (DOXYGEN_FOUND)
+set(DOXYGEN_PROJECT_LOGO novel-chan-header_doxy.jpg)
+
+set(DOXYGEN_JAVADOC_AUTOBRIEF YES)
+set(DOXYGEN_JAVADOC_BANNER YES)
+set(DOXYGEN_EXTRACT_PRIV_VIRTUAL YES)
+set(DOXYGEN_EXTRACT_STATIC YES)
+set(DOXYGEN_CASE_SENSE_NAMES NO)
+
+set(DOXYGEN_HTML_COLORSTYLE_HUE 260)
+set(DOXYGEN_HTML_COLORSTYLE_SAT 245)
+set(DOXYGEN_HTML_COLORSTYLE_GAMMA 120)
+
+set(DOXYGEN_CALL_GRAPH YES)
+set(DOXYGEN_CALLER_GRAPH YES)
+set(DOXYGEN_INTERACTIVE_SVG YES)
+
+set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "README.md CODE_OF_CONDUCT.md LICENCE.md")
+
+doxygen_add_docs(Doxygen
+        ALL
+        COMMENT "Generating documentation"
+        ${DOXYGEN_OUTPUT_DIR}/README.md
+        ${DOXYGEN_OUTPUT_DIR}/CODE_OF_CONDUCT.md
+        ${DOXYGEN_OUTPUT_DIR}/LICENCE.md
+        ${CMAKE_SOURCE_DIR}/include
+        )

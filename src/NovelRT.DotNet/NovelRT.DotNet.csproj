@@ -1,11 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TargetFramework>net5.0</TargetFramework>
+    <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
     <None Update="NovelRT.DotNet.runtimeconfig.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.DotNetAppHost" Version="5.0.0" />
+    <PackageReference Include="Inkle.Ink.Engine" Version="0.7.4" />
+  </ItemGroup>
+
+  <!-- DO NOT REMOVE: Used by CMakeLists to identify project outputs -->
+  <Target Name="GetCMakeOutputAssembly">
+    <Message Importance="High" Text="$(TargetFileName)" />
+  </Target>
+
+  <!-- DO NOT REMOVE: Used by CMakeLists to identify project outputs -->
+  <Target Name="GetCMakeOutputByproducts" DependsOnTargets="ComputeFilesToPublish">
+    <Message Importance="High" Text="@(ResolvedFileToPublish->'$(PublishDir)%(RelativePath)')" />
+  </Target>
 
 </Project>
