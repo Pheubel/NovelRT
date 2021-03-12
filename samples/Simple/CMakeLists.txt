@@ -42,3 +42,13 @@ add_custom_command(
     $<TARGET_FILE_DIR:Engine>
     $<TARGET_FILE_DIR:Simple>
 )
+
+if(APPLE)
+add_custom_command(TARGET Simple POST_BUILD COMMAND install_name_tool -change @rpath/libnethost.dylib @rpath/dotnet/libnethost.dylib ${CMAKE_BINARY_DIR}/bin/Simple)
+add_custom_command(
+      TARGET Simple POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE_DIR:Simple>/dotnet/libnethost.dylib
+        ${CMAKE_BINARY_DIR}/lib
+    )
+endif()

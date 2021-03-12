@@ -152,3 +152,7 @@ if(WIN32)
       $<TARGET_FILE_DIR:Engine>)
   endif()
 endif()
+
+if(APPLE)
+  add_custom_command(TARGET Engine POST_BUILD COMMAND install_name_tool -change @rpath/libnethost.dylib @rpath/dotnet/libnethost.dylib ${CMAKE_BINARY_DIR}/lib/libEngine.dylib)
+endif()

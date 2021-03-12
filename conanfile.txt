@@ -13,6 +13,7 @@ ms-gsl/3.1.0
 [generators]
 cmake_find_package
 cmake_paths
+cmake
 
 [options]
 freetype:shared=True
@@ -35,3 +36,4 @@ spdlog:header_only=True
 [imports]
 bin, *.dll -> ./thirdparty
 lib, *.dll -> ./thirdparty
+lib, *.dylib -> ./bin

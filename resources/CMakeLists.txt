@@ -7,7 +7,11 @@ set(RESOURCES_FILES
   Scripts/avg.lua
   Scripts/story.ink
   Scripts/story.json
+)
 
+if(NOT APPLE)
+set(RESOURCES_FILES
+  ${RESOURCES_FILES}
   Shaders/BasicFragmentShader.glsl
   Shaders/BasicVertexShader.glsl
   Shaders/FontFragmentShader.glsl
@@ -15,6 +19,17 @@ set(RESOURCES_FILES
   Shaders/TexturedFragmentShader.glsl
   Shaders/TexturedVertexShader.glsl
 )
+else()
+set(RESOURCES_FILES
+  ${RESOURCES_FILES}
+  Shaders/BasicFragmentShader_Apple.glsl
+  Shaders/BasicVertexShader_Apple.glsl
+  Shaders/FontFragmentShader_Apple.glsl
+  Shaders/FontVertexShader_Apple.glsl
+  Shaders/TexturedFragmentShader_Apple.glsl
+  Shaders/TexturedVertexShader_Apple.glsl
+)
+endif()
 
 foreach(resource ${RESOURCES_FILES})
   configure_file(${resource} Resources/${resource} COPYONLY)

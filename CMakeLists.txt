@@ -50,6 +50,12 @@ set(NOVELRT_GSL_VERSION "3.1.0" CACHE STRING "ms-gsl version")
 
 if (NOVELRT_INCLUDE_CONAN_PATHS)
   include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+  if(APPLE)
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup(KEEP_RPATHS)
+  set(CMAKE_INSTALL_RPATH "@executable_path")
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+  endif()
 endif()
 
 
