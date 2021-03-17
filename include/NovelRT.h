@@ -206,6 +206,7 @@ namespace NovelRT::Windowing {
 #include "NovelRT/Graphics/TextRect.h"
 
 #include "NovelRT/Experimental/Graphics/Graphics.h"
+#include "NovelRT/Experimental/Graphics/OpenGLES3_0/OpenGLES3_0.h"
 
 //Ink types
 #include "NovelRT/Ink/Story.h"
